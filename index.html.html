@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Few or Little? Quantifier Quest</title>
+<style>
+:root{--bg:#0f0b1e;--card:#1b1535;--ink:#f4f1ff;--mut:#a79fcf;--a:#7c5cff;--b:#00e0b0;--ok:#22d67a;--no:#ff4d6d;--gold:#ffc83d;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;min-height:100vh}
+#app{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:2rem;margin:.2em 0;background:linear-gradient(90deg,var(--b),var(--a));-webkit-background-clip:text;background-clip:text;color:transparent}
+.card{background:var(--card);border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 6px 24px #0006}
+input{width:100%;padding:12px;border-radius:12px;border:2px solid #3a2f6b;background:#120e28;color:var(--ink);font-size:1.05rem;margin:6px 0}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:14px 18px;color:#fff;background:var(--a);font-weight:700;font-size:1.05rem;transition:transform .1s}
+button:active{transform:scale(.96)}button:disabled{opacity:.5}
+.big{width:100%}.row{display:flex;gap:10px}.row button{flex:1}
+.hud{display:flex;justify-content:space-between;font-weight:700;gap:8px;flex-wrap:wrap}
+.bar{height:10px;background:#2a2150;border-radius:9px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--gold));width:100%}
+.q{font-size:1.5rem;line-height:1.4;margin:14px 0;min-height:4.2em}
+.blank{color:var(--gold);border-bottom:3px dashed var(--gold);padding:0 10px}
+.opt{font-size:1.25rem;padding:20px 8px}.opt.f{background:#2f6bff}.opt.l{background:#c23bff}
+.fb{min-height:3em;font-weight:700;margin-top:8px}.ok{color:var(--ok)}.no{color:var(--no)}
+.mut{color:var(--mut);font-size:.9rem}.pill{background:#2a2150;border-radius:99px;padding:4px 12px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{padding:6px 4px;text-align:left;border-bottom:1px solid #2a2150}
+.shake{animation:sh .3s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pop{animation:pp .35s}@keyframes pp{50%{transform:scale(1.06)}}
+.stars{font-size:2.2rem}.hide{display:none}
+</style></head><body><div id="app"></div>
+<script>
+const P1="I have ___ friends at school.|F;Can I have ___ water, please?|L;She bought ___ apples.|F;We need ___ sugar for the cake.|L;He has ___ books in his room.|F;I need ___ money to buy a sandwich.|L;There are ___ students in the classroom.|F;Please give me ___ milk.|L;I have ___ questions.|F;She needs ___ time.|L;We saw ___ birds in the park.|F;Add ___ salt to the soup.|L;He ate ___ rice.|L;I bought ___ bananas.|F;Can you give me ___ advice?|L;There are ___ chairs in the room.|F;I have ___ homework today.|L;She has ___ coins in her bag.|F;Drink ___ juice.|L;We stayed there for ___ days.|F;He put ___ butter on the bread.|L;I need ___ pencils.|F;There is ___ coffee in the cup.|L;She has ___ photos of her family.|F;We need ___ information.|L;I saw ___ cars outside.|F;He drank ___ tea.|L;I have ___ minutes before class.|F;Put ___ cheese on the pizza.|L;She made ___ mistakes.|F;There is ___ water in the bottle.|L;We invited ___ people to the party.|F;I need ___ help.|L;He has ___ toys.|F;Add ___ oil to the pan.|L;I read ___ pages of the book.|F;She needs ___ sleep.|L;There are ___ eggs in the fridge.|F;He has ___ experience.|L;I bought ___ notebooks.|F";
+const P2="I have ___ money in my wallet.|L;She bought ___ oranges.|F;We need ___ water.|L;There are ___ children in the garden.|F;Can I have ___ sugar?|L;He has ___ good friends.|F;I need ___ information.|L;She drank ___ milk.|L;We have ___ minutes before the bus comes.|F;There is ___ cheese in the fridge.|L;I saw ___ dogs in the street.|F;Please give me ___ coffee.|L;He bought ___ books yesterday.|F;I need ___ help with my homework.|L;There are ___ sandwiches on the table.|F;She put ___ salt in the soup.|L;We have ___ chairs here.|F;I have ___ homework to finish.|L;He ate ___ bread.|L;She has ___ pictures on her phone.|F;Add ___ oil to the salad.|L;I need ___ days to finish it.|F;There is ___ juice left.|L;We saw ___ interesting places.|F;Can you give me ___ advice?|L;He has ___ coins in his pocket.|F;I need ___ time to think.|L;She bought ___ flowers.|F;There is ___ rice on the plate.|L;We invited ___ friends.|F";
+const P3="I am hungry. I want ___ food.|L;I have ___ books, so you can borrow one.|F;She is thirsty. She wants ___ water.|L;We have ___ students today. The classroom is not full.|F;He needs ___ money to buy a pen.|L;I bought ___ apples for my family.|F;There is ___ milk in the fridge.|L;She has ___ close friends.|F;I need ___ time to finish my homework.|L;There are ___ cars in the parking lot.|F;He put ___ sugar in his tea.|L;We stayed for ___ minutes.|F;I have ___ questions for you.|F;She needs ___ information about the course.|L;There are ___ eggs in the basket.|F;I drank ___ water after running.|L;He has ___ pencils in his bag.|F;Please add ___ salt.|L;We saw ___ birds in the tree.|F;I need ___ help with this exercise.|L;She bought ___ new dresses.|F;There is ___ coffee left.|L;I have ___ photos from my holiday.|F;He needs ___ sleep.|L;We have ___ lessons today.|F;She put ___ butter on the bread.|L;There are ___ people at the bus stop.|F;I need ___ money for lunch.|L;He made ___ mistakes in the test.|F;Can I have ___ tea, please?|L";
+const P4="I / have / friends / at school|F|I have a few friends at school.;She / need / water|L|She needs a little water.;We / have / minutes / before class|F|We have a few minutes before class.;He / want / sugar / in his tea|L|He wants a little sugar in his tea.;There / be / students / in the classroom|F|There are a few students in the classroom.;I / need / money / for lunch|L|I need a little money for lunch.;She / buy / apples / yesterday|F|She bought a few apples yesterday.;We / have / time / before the bus comes|L|We have a little time before the bus comes.;He / drink / milk / every morning|L|He drinks a little milk every morning.;There / be / books / on the table|F|There are a few books on the table.;I / need / help / with my homework|L|I need a little help with my homework.;She / have / pictures / on her phone|F|She has a few pictures on her phone.;Please / add / salt / to the soup|L|Please add a little salt to the soup.;We / see / birds / in the park|F|We see a few birds in the park.;He / need / information / about the course|L|He needs a little information about the course.;I / buy / bananas / at the market|F|I buy a few bananas at the market.;There / be / juice / in the bottle|L|There is a little juice in the bottle.;She / have / questions / for the teacher|F|She has a few questions for the teacher.;I / need / time / to finish my work|L|I need a little time to finish my work.;They / invite / friends / to the party|F|They invite a few friends to the party.";
+const sp=s=>s.split(";").map(x=>x.split("|"));
+const ST=[
+ {n:"Warm-Up",e:"🔥",t:"c",time:12,q:sp(P1)},
+ {n:"Type It!",e:"⌨️",t:"w",time:20,q:sp(P2)},
+ {n:"Context Battle",e:"⚔️",t:"c",time:14,q:sp(P3)},
+ {n:"BOSS: Build It",e:"👑",t:"s",time:50,q:sp(P4)}];
+const RULE={F:"a few = countable things you can count (friends, apples, minutes).",L:"a little = uncountable things you can't count (water, money, time)."};
+const $=s=>document.querySelector(s),app=$("#app");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let db=null,uid=null,isOwner=false,me={name:"",group:""},G=null,unsub=null,timer=null;
+const rank=s=>s>=14000?"🏆 Grammar Legend":s>=10000?"💎 Diamond":s>=6000?"🥇 Gold":s>=3000?"🥈 Silver":"🥉 Rookie";
+
+(async()=>{try{const c=window.claude;if(c){db=await c.use("db");const u=await c.use("user");if(u){uid=await u.id();isOwner=u.isOwner()}}}catch(e){db=null}
+ const n=document.querySelector('#nm');if(n&&!n.value&&!G)home()})();
+home();
+
+function home(){
+ if(timer)clearInterval(timer);
+ app.innerHTML=`<h1>Few or Little? ⚡</h1><p class="mut">120 questions · 4 stages · beat the clock, build combos, climb the leaderboard.</p>
+ <div class="card"><b>Your nickname</b><input id="nm" maxlength="20" placeholder="e.g. Aziz" value="${esc(me.name)}">
+ <b>Class / group (optional)</b><input id="gr" maxlength="20" placeholder="e.g. Group B" value="${esc(me.group)}">
+ <button class="big" id="go">Start Quest 🚀</button>
+ <p class="mut">${db&&uid?"✅ Your results are saved for your teacher.":"⚠️ Sign-in not detected: you can still play, then copy your result and send it to your teacher."}</p></div>
+ <div class="card"><b>🏅 Leaderboard</b><div id="lb" class="mut">Loading…</div></div>`;
+ $("#go").onclick=()=>{me.name=$("#nm").value.trim();me.group=$("#gr").value.trim();if(!me.name){$("#nm").focus();return}start()};
+ board("#lb")}
+
+function board(sel){
+ if(unsub){try{unsub()}catch(e){}unsub=null}
+ const el=$(sel);if(!db){el.textContent="Leaderboard is not available in this view.";return}
+ try{unsub=db.collection("results").orderBy("score","desc").limit(50).onSnapshot(s=>{
+  if(!$(sel))return;if(s.empty){el.textContent="No scores yet. Be the first! 🥇";return}
+  el.innerHTML="<table><tr><th>#</th><th>Player</th><th>Score</th><th>✔</th>"+(isOwner?"<th>S1</th><th>S2</th><th>S3</th><th>S4</th>":"")+"</tr>"+
+  s.docs.map((d,i)=>{const r=d.data()||{},st=r.stages||[];return`<tr><td>${i+1}</td><td>${esc(r.name)} <span class="mut">${esc(r.group)}</span></td><td>${esc(r.score)}</td><td>${esc(r.correct)}/${esc(r.answered)}</td>`+
+  (isOwner?[0,1,2,3].map(k=>`<td>${st[k]==null?"–":esc(st[k])}</td>`).join(""):"")+"</tr>"}).join("")+"</table>"},()=>{el.textContent="Leaderboard unavailable."})}
+ catch(e){el.textContent="Leaderboard unavailable."}}
+
+function start(){G={si:0,score:0,correct:0,answered:0,streak:0,best:0,stages:[],wrong:[]};stage()}
+function stage(){
+ const s=ST[G.si];G.qs=sh(s.q);G.i=0;G.sc=0;
+ app.innerHTML=`<div class="card" style="text-align:center"><div style="font-size:3rem">${s.e}</div><h1>Stage ${G.si+1}: ${s.n}</h1>
+ <p>${s.t=="c"?"Tap <b>a few</b> or <b>a little</b>.":s.t=="w"?"Type <b>a few</b> or <b>a little</b>.":"Type the full sentence with <b>a few</b> or <b>a little</b>."}</p>
+ <p class="mut">${G.qs.length} questions · ${s.time}s each</p><button class="big" id="s">Go! ⚔️</button></div>`;
+ $("#s").onclick=ask}
+
+function ask(){
+ const s=ST[G.si],q=G.qs[G.i];let left=s.time*1000,done=false;
+ const prompt=s.t=="s"?q[0].split(" / ").join("  ·  "):esc(q[0]).replace("___",s.t=="w"?'<span class="blank">&nbsp;&nbsp;?&nbsp;&nbsp;</span>':'<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+ app.innerHTML=`<div class="hud"><span class="pill">${s.e} ${G.si+1}/4 · ${G.i+1}/${G.qs.length}</span><span class="pill">⭐ ${G.score}</span><span class="pill">🔥 x${mult()}</span></div>
+ <div class="bar"><i id="tb"></i></div><div class="card" id="qc"><div class="q">${prompt}</div>
+ ${s.t=="c"?'<div class="row"><button class="opt f" data-a="F">a few</button><button class="opt l" data-a="L">a little</button></div>':
+ `<input id="ans" autocomplete="off" autocapitalize="off" placeholder="${s.t=="w"?"a few / a little":"Write the sentence…"}"><button class="big" id="ok">Check ✅</button>`}
+ <div class="fb" id="fb"></div></div>`;
+ const fin=(user,t)=>{if(done)return;done=true;clearInterval(timer);
+  let ok=false;const w=q[1];
+  if(user!=null){if(s.t=="s"){const u=user.toLowerCase().replace(/[.!?]/g,"").trim(),pq=w=="F"?"a few":"a little",no=w=="F"?"a little":"a few";ok=u.includes(pq)&&!u.includes(no)&&u.includes(q[0].split(" / ")[2].toLowerCase())&&u.split(/\s+/).length>=4}
+   else ok=s.t=="c"?user==w:user.toLowerCase().trim()==(w=="F"?"a few":"a little")}
+  G.answered++;
+  let pts=0;if(ok){G.streak++;G.best=Math.max(G.best,G.streak);pts=Math.round((100+50*left/(s.time*1000))*mult());G.score+=pts;G.sc++;G.correct++}
+  else{G.streak=0;G.wrong.push(q[0])}
+  const fb=$("#fb"),qc=$("#qc");qc.classList.add(ok?"pop":"shake");
+  const ans=s.t=="s"?q[2]:(w=="F"?"a few":"a little");
+  fb.innerHTML=ok?`<span class="ok">✅ +${pts} ${G.streak>=3?"🔥 combo!":""}</span><div class="mut">${RULE[w]}</div>`:`<span class="no">${t?"⏰ Time's up! ":"❌ "}Answer: <b>${esc(ans)}</b></span><div class="mut">${RULE[w]}</div>`;
+  document.querySelectorAll("button,input").forEach(b=>b.disabled=true);
+  const nx=document.createElement("button");nx.className="big";nx.textContent="Next ➡️";nx.style.marginTop="10px";qc.appendChild(nx);nx.focus();
+  nx.onclick=()=>{G.i++;G.i<G.qs.length?ask():endStage()}};
+ if(s.t=="c")document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>fin(b.dataset.a));
+ else{const inp=$("#ans");inp.focus();$("#ok").onclick=()=>fin(inp.value);inp.onkeydown=e=>{if(e.key=="Enter")fin(inp.value)}}
+ const tb=$("#tb"),t0=Date.now();
+ timer=setInterval(()=>{left=s.time*1000-(Date.now()-t0);tb.style.width=Math.max(0,left/(s.time*10))+"%";if(left<=0){const v=$("#ans");fin(s.t=="c"?null:null,true)}},100)}
+const mult=()=>G.streak>=6?3:G.streak>=3?2:1;
+
+function endStage(){
+ const n=G.qs.length,pc=Math.round(G.sc/n*100);G.stages.push(pc);save(false);
+ const last=G.si==ST.length-1;
+ app.innerHTML=`<div class="card" style="text-align:center"><h1>${ST[G.si].n} complete!</h1>
+ <div class="stars">${pc>=90?"⭐⭐⭐":pc>=70?"⭐⭐":pc>=40?"⭐":"💪"}</div>
+ <p><b>${G.sc}/${n}</b> correct (${pc}%) · Total score <b>${G.score}</b></p><button class="big" id="n">${last?"See my results 🏁":"Next stage ➡️"}</button></div>`;
+ $("#n").onclick=()=>{if(last)final();else{G.si++;stage()}}}
+
+function final(){
+ save(true);const acc=Math.round(G.correct/G.answered*100);
+ const txt=`Few or Little Quest | ${me.name}${me.group?" ("+me.group+")":""} | Score ${G.score} | ${G.correct}/${G.answered} (${acc}%) | Stages ${G.stages.join("/")}% | Best streak ${G.best}`;
+ app.innerHTML=`<div class="card" style="text-align:center"><div style="font-size:3rem">🏁</div><h1>${esc(me.name)}</h1><h2>${rank(G.score)}</h2>
+ <p>Score <b>${G.score}</b> · Accuracy <b>${acc}%</b> · Best streak <b>${G.best}🔥</b></p>
+ <p class="mut">Stages: ${G.stages.map((x,i)=>ST[i].n+" "+x+"%").join(" · ")}</p>
+ ${G.wrong.length?`<p class="mut">Practise more: ${esc(G.wrong.slice(0,4).map(x=>x.replace(/ \/ /g," ")).join(" • "))}</p>`:"<p>Perfect! 👑</p>"}
+ <button class="big" id="cp">📋 Copy my result</button><p id="cm" class="mut"></p><button class="big" id="ag" style="margin-top:8px;background:var(--b);color:#0f0b1e">Play again 🔁</button></div>
+ <div class="card"><b>🏅 Leaderboard</b><div id="lb" class="mut">Loading…</div></div>`;
+ $("#cp").onclick=async()=>{try{await navigator.clipboard.writeText(txt);$("#cm").textContent="Copied! Send it to your teacher."}catch(e){$("#cm").textContent=txt}};
+ $("#ag").onclick=home;board("#lb")}
+
+async function save(done){
+ if(!db||!uid)return;
+ try{await db.collection("results").doc(uid).set({name:me.name,group:me.group,score:G.score,correct:G.correct,answered:G.answered,stages:G.stages,best:G.best,done,ts:Date.now()})}catch(e){}}
+</script></body></html>
